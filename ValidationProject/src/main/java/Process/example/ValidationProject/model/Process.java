@@ -18,6 +18,12 @@ public class Process {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String nomeCliente;
+
+    private String produto;
+
+    private String modelo;
+
     private String descricao;
 
     @Enumerated(EnumType.STRING)

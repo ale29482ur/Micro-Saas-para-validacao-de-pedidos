@@ -3,6 +3,7 @@ package Process.example.ValidationProject.controller;
 import Process.example.ValidationProject.model.Process;
 import Process.example.ValidationProject.service.ProcessService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,12 +19,12 @@ public class ProcessController {
         this.processService = processService;
     }
 
-    @PostMapping("/user/{userId}")
+    @PostMapping()
     public ResponseEntity<Process> create(
-            @PathVariable Long userId,
-            @RequestBody String descricao) {
+            Authentication authentication,
+            @RequestBody Process process) {
 
-        return ResponseEntity.ok(processService.createProcess(userId, descricao)
+        return ResponseEntity.ok(processService.createProcess(authentication, process)
         );
     }
 
@@ -34,29 +35,27 @@ public class ProcessController {
         return processService.ReadProcess(processId);
     }
 
-    @PutMapping("/{processId}/{userId}/next")
+    @PutMapping("/{processId}/next")
     public ResponseEntity<Process> next(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long processId) {
 
-        return ResponseEntity.ok(processService.nextProcess(userId,processId));
-
+        return ResponseEntity.ok(processService.nextProcess(authentication,processId));
     }
 
-    @PutMapping("/{processId}/{userId}/cancel")
+    @PutMapping("/{processId}/cancel")
     public ResponseEntity<Process> cancel(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long processId){
 
-        return ResponseEntity.ok( processService.cancelProcess(userId, processId));
+        return ResponseEntity.ok( processService.cancelProcess(authentication, processId));
     }
 
-    @DeleteMapping("/{processId}/{userId}/delete")
+    @DeleteMapping("/{processId}/delete")
     public void delete(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable Long processId) {
 
-        processService.deleteProcess(userId,processId);
-
+        processService.deleteProcess(authentication,processId);
     }
 }

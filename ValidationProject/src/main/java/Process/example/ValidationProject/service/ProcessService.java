@@ -6,9 +6,11 @@ import Process.example.ValidationProject.model.User;
 import Process.example.ValidationProject.repository.ProcessRepository;
 import Process.example.ValidationProject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -17,50 +19,71 @@ public class ProcessService {
     private final UserRepository userRepository;
     private final ProcessRepository processRepository;
 
-    public Process createProcess(Long userId, String descricao) {
+    public Process createProcess(Authentication authentication, Process process) {
 
-        User user = userRepository.findById(userId)
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Process process = new Process();
+        process.setUser(user);
 
-        process.setDescricao(descricao);
         process.setStatus(StatusPedido.EM_ANALISE_TECNICA);
         process.setUser(user);
 
         return processRepository.save(process);
     }
 
-    public Process nextProcess(Long userId, Long processId){
-        Process process = processRepository.findById(processId)
+    public Process nextProcess(Authentication authentication, Long processId) {
+
+        String email = authentication.getName();
+
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+
+        Process process = processRepository
+                .findByIdAndUser(processId, user)
                 .orElseThrow(() -> new RuntimeException("process not found"));
 
         process.setStatus(process.getStatus().proximoStatus());
 
         return processRepository.save(process);
-
     }
 
-    public Process cancelProcess(Long userId,Long processId) {
+    public Process cancelProcess(Authentication authentication,Long processId) {
 
-        Process process = processRepository.findById(processId)
-                .orElseThrow( () -> new RuntimeException("process not found"));
+        String email = authentication.getName();
+
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+
+        Process process = processRepository
+                .findByIdAndUser(processId, user)
+                .orElseThrow(() -> new RuntimeException("process not found"));
 
         process.setStatus(process.getStatus().cancelStatus());
 
         return processRepository.save(process);
     }
 
-    public void deleteProcess(Long userId, Long processId){
+    public void deleteProcess(Authentication authentication, Long processId){
 
-        Process process = processRepository.findById(processId)
+        String email = authentication.getName();
+
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+
+        Process process = processRepository
+                .findByIdAndUser(processId, user)
                 .orElseThrow(() -> new RuntimeException("process not found"));
 
-        processRepository.deleteById(processId);
+        processRepository.delete(process);
     }
 
     public Process ReadProcess(Long processId) {
-
         return processRepository.findById(processId)
                 .orElseThrow(() -> new RuntimeException("process not found"));
     }
