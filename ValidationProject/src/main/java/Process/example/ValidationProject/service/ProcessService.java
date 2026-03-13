@@ -6,6 +6,7 @@ import Process.example.ValidationProject.model.User;
 import Process.example.ValidationProject.repository.ProcessRepository;
 import Process.example.ValidationProject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -21,53 +22,121 @@ public class ProcessService {
 
     public Process createProcess(Authentication authentication, Process process) {
 
-        String email = authentication.getName();
+        try {
+            if (process.getDescricao() == null || process.getDescricao().isBlank()) {
+                throw new IllegalStateException("Description is null or blank");
+            }
+            if (process.getProduto() == null || process.getProduto().isBlank()) {
+                throw new IllegalStateException("Product is null or blank");
+            }
+            if (process.getModelo() == null || process.getModelo().isBlank()) {
+                throw new IllegalStateException("Model is null or blank");
+            }
+            if (process.getNomeCliente() == null || process.getNomeCliente().isBlank()) {
+                throw new IllegalStateException("Client name is null or blank");
+            }
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+            String email = authentication.getName();
 
-        process.setUser(user);
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
-        process.setStatus(StatusPedido.EM_ANALISE_TECNICA);
-        process.setUser(user);
+            process.setUser(user);
 
-        return processRepository.save(process);
+            process.setStatus(StatusPedido.EM_ANALISE_TECNICA);
+            process.setUser(user);
+
+            return processRepository.save(process);
+
+        } catch (IllegalStateException e) {
+            throw new RuntimeException("Invalid process data: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Error create process", e);
+        }
     }
 
     public Process nextProcess(Authentication authentication, Long processId) {
 
-        String email = authentication.getName();
+        try {
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user not found"));
+            if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+                throw new IllegalStateException("Authentication is null or unauthorized");
+            }
 
-        Process process = processRepository.findByIdAndUser(processId, user).orElseThrow(() -> new RuntimeException("process not found"));
+            String email = authentication.getName();
 
-        process.setStatus(process.getStatus().proximoStatus());
+            if (email == null || email.isBlank()) {
+                throw new IllegalStateException("The token does not have a valid email address.");
+            }
 
-        return processRepository.save(process);
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user not found"));
+
+            Process process = processRepository.findByIdAndUser(processId, user).orElseThrow(() -> new RuntimeException("process not found"));
+
+            process.setStatus(process.getStatus().proximoStatus());
+
+            return processRepository.save(process);
+
+        } catch (IllegalStateException e) {
+            throw new RuntimeException("Invalid process data: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Error next process", e);
+        }
     }
 
     public Process cancelProcess(Authentication authentication, Long processId) {
 
-        String email = authentication.getName();
+        try {
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user not found"));
+            if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+                throw new IllegalStateException("Authentication is null or unauthorized");
+            }
 
-        Process process = processRepository.findByIdAndUser(processId, user).orElseThrow(() -> new RuntimeException("process not found"));
+            String email = authentication.getName();
 
-        process.setStatus(process.getStatus().cancelStatus());
+            if (email == null || email.isBlank()) {
+                throw new IllegalStateException("The token does not have a valid email address.");
+            }
 
-        return processRepository.save(process);
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user not found"));
+
+            Process process = processRepository.findByIdAndUser(processId, user).orElseThrow(() -> new RuntimeException("process not found"));
+
+            process.setStatus(process.getStatus().cancelStatus());
+
+            return processRepository.save(process);
+
+        } catch (IllegalStateException e) {
+            throw new RuntimeException("Invalid process data: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Error next process", e);
+        }
     }
 
     public void deleteProcess(Authentication authentication, Long processId) {
 
-        String email = authentication.getName();
+        try {
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user not found"));
+            if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+                throw new IllegalStateException("Authentication is null or unauthorized");
+            }
 
-        Process process = processRepository.findByIdAndUser(processId, user).orElseThrow(() -> new RuntimeException("process not found"));
+            String email = authentication.getName();
 
-        processRepository.delete(process);
+            if (email == null || email.isBlank()) {
+                throw new IllegalStateException("The token does not have a valid email address.");
+            }
+
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user not found"));
+
+            Process process = processRepository.findByIdAndUser(processId, user).orElseThrow(() -> new RuntimeException("process not found"));
+
+            processRepository.delete(process);
+
+        } catch (IllegalStateException e) {
+            throw new RuntimeException("Invalid process data: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Error next process", e);
+        }
     }
 
     public Process ReadProcess(Long processId) {

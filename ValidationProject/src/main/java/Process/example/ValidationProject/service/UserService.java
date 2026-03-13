@@ -35,16 +35,11 @@ public class UserService {
 
         try {
 
-            Optional<User> userBank = userRepository.findByEmail(user.getEmail());
-
-            if (userBank.isPresent()) {
-                throw new IllegalStateException("The email is already registered.");
-            }
             if (user.getName() == null || user.getName().isBlank() || user.getName().length() < 3 || user.getName().length() > 50) {
                 throw new IllegalStateException("The name must be between 3 and 50 characters long.");
             }
             if (user.getAge() == null || user.getAge() < 18 || user.getAge() > 100) {
-                throw new IllegalStateException("The password must be greater than 18 and less than 100.");
+                throw new IllegalStateException("The age must be greater than 18 and less than 100.");
             }
             if (user.getEmail() == null || user.getEmail().isBlank() || user.getEmail().length() < 5) {
                 throw new IllegalStateException("The email address must be longer than 5 characters and be valid.");
@@ -52,15 +47,22 @@ public class UserService {
             if (user.getPassword() == null || user.getPassword().isBlank() || user.getPassword().length() < 3) {
                 throw new IllegalStateException("The password must be longer than 3 characters.");
             }
+
+            Optional<User> userBank = userRepository.findByEmail(user.getEmail());
+
+            if (userBank.isPresent()) {
+                throw new IllegalStateException("The email is already registered.");
+            }
+
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+            return userRepository.save(user);
+
         } catch (IllegalStateException e) {
             throw new RuntimeException("Invalid user data: " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("Error saving user", e);
         }
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        return userRepository.save(user);
     }
 
     public void delete(Authentication authentication) {
@@ -83,9 +85,7 @@ public class UserService {
 
         String email = authentication.getName();
 
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         return UserMapper.toDto(user);
     }
