@@ -44,7 +44,6 @@ public class User {
 
     @Setter
     @Getter
-    @Column(unique = true, nullable = false)
     @NotBlank(message = "Email is required.")
     @Email(message = "Invalid email format.")
     private String email;

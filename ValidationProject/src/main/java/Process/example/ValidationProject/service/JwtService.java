@@ -23,13 +23,8 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email){
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
-                .compact();
+    public String generateToken(String email) {
+        return Jwts.builder().setSubject(email).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)).signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
     public String extractUsername(String token) {
@@ -46,11 +41,7 @@ public class JwtService {
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        final Claims claims = Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
 
         return claimsResolver.apply(claims);
     }

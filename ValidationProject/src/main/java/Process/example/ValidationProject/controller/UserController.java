@@ -1,6 +1,7 @@
 package Process.example.ValidationProject.controller;
 
 import Process.example.ValidationProject.model.User;
+import Process.example.ValidationProject.model.UserDto;
 import Process.example.ValidationProject.repository.UserRepository;
 import Process.example.ValidationProject.service.UserService;
 import jakarta.validation.Valid;
@@ -31,13 +32,17 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) {return userService.save(user);
+    public User createUser(@Valid @RequestBody User user) {
+        return userService.save(user);
     }
 
     @DeleteMapping()
-    public void deleteUser(Authentication authentication) { userService.delete(authentication);
+    public void deleteUser(Authentication authentication) {
+        userService.delete(authentication);
     }
 
     @GetMapping("/me")
-    public User getMe(Authentication authentication) { return userService.getMe(authentication);}
+    public UserDto getMe(Authentication authentication) {
+        return userService.getMe(authentication);
+    }
 }

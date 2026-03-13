@@ -2,13 +2,7 @@ package Process.example.ValidationProject.model;
 
 public enum StatusPedido {
 
-    EM_ANALISE_TECNICA,
-    APROVADO,
-    CANCELADO,
-    EM_REPARO,
-    AGUARDANDO_PAGAMENTO,
-    PAGO,
-    FINALIZADO;
+    EM_ANALISE_TECNICA, APROVADO, CANCELADO, EM_REPARO, AGUARDANDO_PAGAMENTO, PAGO, FINALIZADO;
 
     public StatusPedido proximoStatus() {
         return switch (this) {
@@ -20,8 +14,9 @@ public enum StatusPedido {
             default -> throw new IllegalStateException("Não é possível avançar a partir de " + this);
         };
     }
-    public StatusPedido cancelStatus(){
-        if (this == FINALIZADO || this == CANCELADO){
+
+    public StatusPedido cancelStatus() {
+        if (this == FINALIZADO || this == CANCELADO) {
             throw new IllegalStateException("nao foi possivel cancelar um pedido");
         }
         return CANCELADO;
