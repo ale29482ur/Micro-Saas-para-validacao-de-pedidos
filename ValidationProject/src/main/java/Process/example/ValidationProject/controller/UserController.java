@@ -41,6 +41,11 @@ public class UserController {
         userService.delete(authentication);
     }
 
+    @PutMapping()
+    public ResponseEntity<User> UpdateUser(Authentication authentication, User user) {
+        return userService.update(authentication, user);
+    }
+
     @GetMapping("/me")
     public UserDto getMe(Authentication authentication) {
         return userService.getMe(authentication);

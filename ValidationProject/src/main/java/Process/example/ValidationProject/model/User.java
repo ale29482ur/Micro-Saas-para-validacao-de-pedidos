@@ -42,6 +42,7 @@ public class User {
     @Max(value = 120, message = "Age must be 120 or less.")
     private Integer age;
 
+
     @Setter
     @Getter
     @NotBlank(message = "Email is required.")
@@ -64,6 +65,7 @@ public class User {
     @Getter
     private List<Process> process = new ArrayList<>();
 
-}
+
+    }
 
 

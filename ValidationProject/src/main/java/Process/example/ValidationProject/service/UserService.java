@@ -5,6 +5,7 @@ import Process.example.ValidationProject.model.User;
 import Process.example.ValidationProject.model.UserDto;
 import Process.example.ValidationProject.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -75,6 +76,27 @@ public class UserService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user not found"));
 
         userRepository.delete(user);
+    }
+
+    public ResponseEntity<User> update(Authentication authentication, User userUpdate) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (userUpdate.getName() == null && userUpdate.getAge() == null && userUpdate.getEmail() == null && userUpdate.getPassword() == null) {
+            throw new IllegalStateException("User cant be null");
+        }
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user not found"));
+
+        user.setEmail(userUpdate.getEmail());
+        user.setAge(userUpdate.getAge());
+        user.setPassword(userUpdate.getPassword());
+        user.setName(userUpdate.getName());
+
+        return ResponseEntity.ok(userRepository.save(user));
     }
 
     public UserDto getMe(Authentication authentication) {

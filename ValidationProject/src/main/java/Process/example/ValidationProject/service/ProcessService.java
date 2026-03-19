@@ -6,6 +6,7 @@ import Process.example.ValidationProject.model.User;
 import Process.example.ValidationProject.repository.ProcessRepository;
 import Process.example.ValidationProject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -138,5 +139,41 @@ public class ProcessService {
 
     public Process ReadProcess(Long processId) {
         return processRepository.findById(processId).orElseThrow(() -> new RuntimeException("process not found"));
+    }
+
+    public ResponseEntity<Process> updateProcess(Long processId, Authentication authentication, Process processUpdate) {
+
+
+        try {
+            if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+                throw new IllegalStateException("Authentication is null or unauthorized");
+            }
+
+            String email = authentication.getName();
+
+            if (email == null || email.isBlank()) {
+                throw new IllegalStateException("The token does not have a valid email address.");
+            }
+
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Process process = processRepository.findByIdAndUser(processId,user)
+                    .orElseThrow(() -> new RuntimeException("Process not found"));
+
+            process.setModelo(processUpdate.getModelo());
+            process.setDescricao(processUpdate.getDescricao());
+            process.setProduto(processUpdate.getProduto());
+            process.setNomeCliente(processUpdate.getNomeCliente());
+
+            return ResponseEntity.ok(processRepository.save(process));
+
+        } catch (IllegalStateException e) {
+            throw new RuntimeException("Invalid process data: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Error next process", e);
+        }
+
+
     }
 }

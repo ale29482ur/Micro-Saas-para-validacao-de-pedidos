@@ -27,6 +27,11 @@ public class ProcessController {
         return processService.ReadProcess(processId);
     }
 
+    @PutMapping("/{processId}")
+    public ResponseEntity<Process> Update(@PathVariable Long processId, Authentication authentication, Process processUpdate) {
+        return processService.updateProcess(processId, authentication, processUpdate);
+    }
+
     @PutMapping("/{processId}/next")
     public ResponseEntity<Process> next(Authentication authentication, @PathVariable Long processId) {
         return ResponseEntity.ok(processService.nextProcess(authentication, processId));
